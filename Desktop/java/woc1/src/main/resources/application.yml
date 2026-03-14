@@ -1,17 +1,17 @@
 spring:
-  # 数据库配置
+
   datasource:
     url: jdbc:mysql://localhost:3306/team_manage?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
-  # Spring Security配置（默认关闭，用JWT替代）
+
   security:
     user:
       name: admin
       password: admin
 
-# MyBatis-Plus配置
+
 mybatis-plus:
   mapper-locations: classpath:mapper/**/*.xml
   type-aliases-package: com.team.management.entity
@@ -19,12 +19,12 @@ mybatis-plus:
     map-underscore-to-camel-case: true
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# JWT配置
+
 jwt:
-  secret: team_manage_secret_2024 # 生产环境替换为环境变量
-  expire: 86400000 # Token有效期：24小时（毫秒）
+  secret: team_manage_secret_2024
+  expire: 86400000
   header: Authorization
 
-# 服务端口
+
 server:
   port: 8080
