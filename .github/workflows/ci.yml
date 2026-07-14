@@ -12,7 +12,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:8.0
+        image: mysql:8.4
         env:
           MYSQL_ROOT_PASSWORD: test123
           MYSQL_DATABASE: vocal_chat
@@ -34,6 +34,19 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+      minio:
+        image: minio/minio:latest
+        env:
+          MINIO_ROOT_USER: minioadmin
+          MINIO_SECRET_KEY: minioadmin
+        ports:
+          - 9000:9000
+        options: >-
+          --health-cmd "mc ready local"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -48,18 +61,22 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}-${{ hashFiles('.mvn/wrapper/maven-wrapper.properties') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
             ${{ runner.os }}-maven-
 
       - name: Build with Maven
-        run: ./mvnw clean package
+        run: mvn clean package
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/vocal_chat
+          SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/vocal_chat?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=Asia/Shanghai
           MYSQL_USER: root
           MYSQL_PASSWORD: test123
           REDIS_HOST: redis
           REDIS_PORT: 6379
           REDIS_PASSWORD: ''
           JWT_SECRET: ci-test-secret-key-do-not-use-in-production
+          JWT_EXPIRATION: 3600000
+          MINIO_ENDPOINT: http://minio:9000
+          MINIO_ACCESS_KEY: minioadmin
+          MINIO_SECRET_KEY: minioadmin
