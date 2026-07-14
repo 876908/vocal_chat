@@ -41,11 +41,6 @@ jobs:
           MINIO_SECRET_KEY: minioadmin
         ports:
           - 9000:9000
-        options: >-
-          --health-cmd "mc ready local"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
 
     steps:
       - name: Checkout code
