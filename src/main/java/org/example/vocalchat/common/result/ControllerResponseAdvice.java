@@ -1,7 +1,6 @@
 package org.example.vocalchat.common.result;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vocalchat.common.annotation.AutoResult;
 import org.springframework.core.MethodParameter;
@@ -23,10 +22,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
  */
 @Slf4j
 @RestControllerAdvice
-@RequiredArgsConstructor
 public class ControllerResponseAdvice implements ResponseBodyAdvice<Object> {
 
-    private final ObjectMapper objectMapper;
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     /**
      * 判断是否需要包装：方法或所在类标注了 {@link AutoResult} 则包装。
