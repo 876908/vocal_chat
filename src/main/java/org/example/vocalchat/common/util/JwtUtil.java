@@ -16,6 +16,8 @@ import java.util.Map;
 @Component
 public class JwtUtil {
 
+    private static final long DEFAULT_TTL_SECONDS = 86400;
+
     private final SecretKey key;
     private final StringRedisTemplate redisTemplate;
 
@@ -30,33 +32,37 @@ public class JwtUtil {
     }
 
     public String generateToken(Map<String, Object> claims) {
+        String userId = (String) claims.get("userId");
+        long ttlMillis = expiration > 0 ? expiration : DEFAULT_TTL_SECONDS * 1000;
+
         String token = Jwts.builder()
                 .claims(claims)
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .expiration(new Date(System.currentTimeMillis() + ttlMillis))
                 .signWith(key)
                 .compact();
 
-        String redisKey = "token:" + token;
-        redisTemplate.opsForValue().set(redisKey, "1", Duration.ofMillis(expiration));
+        redisTemplate.opsForValue().set("user:" + userId, token, Duration.ofMillis(ttlMillis));
 
         return token;
     }
 
-    public Claims parseJWT(String jwt) {
-        String redisKey = "token:" + jwt;
-        String value = redisTemplate.opsForValue().get(redisKey);
-        if (value == null) {
+    public Claims parseJWT(String token) {
+        Claims claims = Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
+
+        String userId = claims.get("userId", String.class);
+        String stored = redisTemplate.opsForValue().get("user:" + userId);
+        if (stored == null || !stored.equals(token)) {
             throw new RuntimeException("Token 已失效或不存在");
         }
 
-        return Jwts.parser()
-                .verifyWith(key)
-                .build()
-                .parseSignedClaims(jwt)
-                .getPayload();
+        return claims;
     }
 
-    public void invalidateToken(String jwt) {
-        redisTemplate.delete("token:" + jwt);
+    public void invalidateToken(String userId) {
+        redisTemplate.delete("user:" + userId);
     }
 }

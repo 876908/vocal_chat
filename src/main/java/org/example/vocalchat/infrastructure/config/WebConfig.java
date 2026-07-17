@@ -23,10 +23,9 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(userInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
-                        "/api/v1/auth/register",
-                        "/api/v1/auth/verify-email",
-                        "/api/v1/auth/resend-verification",
-                        "/api/v1/auth/login",
+                        "/api/public/user/register",
+                        "/api/public/user/login",
+                        "/api/public/user/getVerificationCode",
                         "/error"
                 )
                 .order(2);

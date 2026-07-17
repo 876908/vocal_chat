@@ -7,13 +7,11 @@ import org.example.vocalchat.common.context.UserContext;
 import org.example.vocalchat.common.result.BaseResult;
 import org.example.vocalchat.dto.request.LoginRequest;
 import org.example.vocalchat.dto.request.RegisterRequest;
-import org.example.vocalchat.dto.request.ResendVerificationRequest;
-import org.example.vocalchat.dto.response.LoginResponse;
 import org.example.vocalchat.service.AuthService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping("/api/public/user")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -21,30 +19,24 @@ public class AuthController {
 
     @SkipToken
     @PostMapping("/register")
-    public BaseResult<Void> register(@Valid @RequestBody RegisterRequest request) {
+    public BaseResult<String> register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
 
     @SkipToken
-    @GetMapping("/verify-email")
-    public BaseResult<Void> verifyEmail(@RequestParam String email, @RequestParam String code) {
-        return authService.verifyEmail(email, code);
-    }
-
-    @SkipToken
-    @PostMapping("/resend-verification")
-    public BaseResult<Void> resendVerification(@Valid @RequestBody ResendVerificationRequest request) {
-        return authService.resendVerification(request);
-    }
-
-    @SkipToken
     @PostMapping("/login")
-    public BaseResult<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+    public BaseResult<String> login(@Valid @RequestBody LoginRequest request) {
         return authService.login(request);
+    }
+
+    @SkipToken
+    @PostMapping("/getVerificationCode")
+    public BaseResult<Void> getVerificationCode(@RequestParam String email) {
+        return authService.sendVerificationCode(email);
     }
 
     @PostMapping("/logout")
     public BaseResult<Void> logout() {
-        return authService.logout(UserContext.getToken());
+        return authService.logout(UserContext.getUserId());
     }
 }

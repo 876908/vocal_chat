@@ -12,29 +12,17 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("sys_user")
+@TableName("user")
 public class User {
 
-    @TableId(type = IdType.AUTO)
-    private Long id;
+    @TableId
+    private String id;
+
+    private String nickName;
 
     private String email;
 
     private String password;
-
-    private String nickname;
-
-    private String avatarUrl;
-
-    private Integer gender;
-
-    private String emailStatus;
-
-    private String status;
-
-    private Integer loginFailCount;
-
-    private LocalDateTime lockedUntil;
 
     @TableField(fill = FieldFill.INSERT)
     private LocalDateTime createdAt;

@@ -9,15 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class LoginResponse {
+public class UserInfoVO {
 
-    private String token;
+    private String id;
 
-    private Long userId;
+    private String nickName;
 
     private String email;
-
-    private String nickname;
-
-    private String avatarUrl;
 }

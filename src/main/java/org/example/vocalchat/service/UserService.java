@@ -1,13 +1,9 @@
 package org.example.vocalchat.service;
 
 import org.example.vocalchat.common.result.BaseResult;
-import org.example.vocalchat.dto.response.UserVO;
+import org.example.vocalchat.dto.response.UserInfoVO;
 
 public interface UserService {
 
-    BaseResult<UserVO> getUserInfo(Long userId);
-
-    BaseResult<UserVO> updateUserInfo(Long userId, String nickname, String avatarUrl, Integer gender);
-
-    BaseResult<Void> changePassword(Long userId, String oldPassword, String newPassword);
+    BaseResult<UserInfoVO> getUserInfo(String userId);
 }
