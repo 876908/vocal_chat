@@ -1,8 +1,5 @@
 package org.example.vocalchat.infrastructure.interceptor;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.example.vocalchat.common.annotation.SkipToken;
 import org.example.vocalchat.common.context.UserContext;
 import org.example.vocalchat.common.enums.ErrorEnum;
@@ -11,6 +8,10 @@ import org.example.vocalchat.common.util.JwtUtil;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 
 @Component
 @RequiredArgsConstructor
@@ -28,7 +29,7 @@ public class UserInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        // 类或方法上有 @SkipToken 则跳过鉴权
+       
         if (handlerMethod.getMethodAnnotation(SkipToken.class) != null
                 || handlerMethod.getBeanType().isAnnotationPresent(SkipToken.class)) {
             return true;

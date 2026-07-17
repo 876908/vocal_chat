@@ -9,9 +9,9 @@ import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
@@ -37,7 +37,7 @@ public class JwtUtil {
                 .compact();
 
         String redisKey = "token:" + token;
-        redisTemplate.opsForValue().set(redisKey, "1", expiration, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(redisKey, "1", Duration.ofMillis(expiration));
 
         return token;
     }
