@@ -2,9 +2,6 @@ spring:
   application:
     name: vocal-chat
     version: 1.0.0
-  docker:
-    compose:
-      enabled: false
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -12,12 +9,12 @@ spring:
   datasource:
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/vocal_chat}
-    username: ${MYSQL_USER:root}
-    password: ${MYSQL_PASSWORD:test123}
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
   data:
     redis:
-      host: ${REDIS_HOST:localhost}
+      host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
 mybatis-plus:
@@ -26,5 +23,5 @@ mybatis-plus:
     map-underscore-to-camel-case: true
   mapper-locations: classpath:mapper/*.xml
 jwt:
-  secret: ${JWT_SECRET:local-dev-secret-do-not-use-in-production}
+  secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:3600000}
