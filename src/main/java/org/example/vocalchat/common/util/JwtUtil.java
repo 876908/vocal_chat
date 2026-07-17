@@ -3,6 +3,8 @@ package org.example.vocalchat.common.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.example.vocalchat.common.enums.ErrorEnum;
+import org.example.vocalchat.common.exception.BaseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
@@ -56,7 +58,7 @@ public class JwtUtil {
         String userId = claims.get("userId", String.class);
         String stored = redisTemplate.opsForValue().get("user:" + userId);
         if (stored == null || !stored.equals(token)) {
-            throw new RuntimeException("Token 已失效或不存在");
+            throw new BaseException(ErrorEnum.TOKEN_EXPIRED);
         }
 
         return claims;

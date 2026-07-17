@@ -17,7 +17,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserInterceptor implements HandlerInterceptor {
 
-    private static final String TOKEN_HEADER = "Token";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+    private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtUtil jwtUtil;
 
@@ -33,8 +34,12 @@ public class UserInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String token = request.getHeader(TOKEN_HEADER);
-        if (token == null || token.isBlank()) {
+        String header = request.getHeader(AUTHORIZATION_HEADER);
+        if (header == null || !header.startsWith(BEARER_PREFIX)) {
+            throw new BaseException(ErrorEnum.TOKEN_MISSING);
+        }
+        String token = header.substring(BEARER_PREFIX.length()).trim();
+        if (token.isBlank()) {
             throw new BaseException(ErrorEnum.TOKEN_MISSING);
         }
 

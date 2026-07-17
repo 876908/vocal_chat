@@ -27,12 +27,6 @@ public class GlobalExceptionHandler {
         return BaseResult.error(ErrorEnum.PARAM_ERROR.getCode(), msg);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public BaseResult<Void> handleRuntimeException(RuntimeException e) {
-        log.warn("运行时异常: {}", e.getMessage());
-        return BaseResult.error(ErrorEnum.SYSTEM_ERROR.getCode(), e.getMessage());
-    }
-
     @ExceptionHandler(Exception.class)
     public BaseResult<Void> handleException(Exception e) {
         log.error("系统异常", e);
