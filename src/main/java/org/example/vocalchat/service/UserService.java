@@ -1,9 +1,8 @@
 package org.example.vocalchat.service;
 
-import org.example.vocalchat.common.result.BaseResult;
-import org.example.vocalchat.dto.response.UserInfoVO;
+import org.example.vocalchat.dto.response.UserInfoResponse;
 
 public interface UserService {
 
-    BaseResult<UserInfoVO> getUserInfo(String userId);
+    UserInfoResponse getUserInfo(String userId);
 }

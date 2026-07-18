@@ -5,6 +5,8 @@ import com.resend.core.exception.ResendException;
 import com.resend.services.emails.model.CreateEmailOptions;
 import com.resend.services.emails.model.CreateEmailResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.example.vocalchat.common.enums.ErrorEnum;
+import org.example.vocalchat.common.exception.BaseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -38,7 +40,7 @@ public class EmailService {
         Boolean canSend = redisTemplate.opsForValue()
                 .setIfAbsent(rateKey, "1", Duration.ofSeconds(RATE_LIMIT_SECONDS));
         if (canSend == null || !canSend) {
-            throw new RuntimeException("发送过于频繁，请60秒后再试");
+            throw new BaseException(ErrorEnum.EMAIL_RATE_LIMIT);
         }
 
         String code = generateCode();
@@ -56,7 +58,7 @@ public class EmailService {
         } catch (ResendException e) {
             log.error("发送验证码邮件失败: {}", toEmail, e);
             redisTemplate.delete(CODE_PREFIX + toEmail);
-            throw new RuntimeException("邮件发送失败，请稍后重试");
+            throw new BaseException(ErrorEnum.EMAIL_SEND_FAILED);
         }
     }
 

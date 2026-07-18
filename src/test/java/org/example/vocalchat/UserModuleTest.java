@@ -1,11 +1,10 @@
 package org.example.vocalchat;
 
 import org.example.vocalchat.common.exception.BaseException;
-import org.example.vocalchat.common.result.BaseResult;
 import org.example.vocalchat.common.util.JwtUtil;
 import org.example.vocalchat.dto.request.LoginRequest;
 import org.example.vocalchat.dto.request.RegisterRequest;
-import org.example.vocalchat.dto.response.UserInfoVO;
+import org.example.vocalchat.dto.response.UserInfoResponse;
 import org.example.vocalchat.entity.User;
 import org.example.vocalchat.infrastructure.service.EmailService;
 import org.example.vocalchat.mapper.UserMapper;
@@ -47,9 +46,8 @@ class UserModuleTest {
     void testSendVerificationCodeSuccess() {
         when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(null);
 
-        BaseResult<Void> result = authService.sendVerificationCode(TEST_EMAIL);
+        authService.sendVerificationCode(TEST_EMAIL);
 
-        assertTrue(result.getSuccess());
         verify(emailService).sendVerificationCode(TEST_EMAIL);
     }
 
@@ -78,10 +76,9 @@ class UserModuleTest {
         req.setPassword(TEST_PASSWORD);
         req.setVerificationCode("123456");
 
-        BaseResult<String> result = authService.register(req);
+        String token = authService.register(req);
 
-        assertTrue(result.getSuccess());
-        assertEquals("jwt-token-xxx", result.getData());
+        assertEquals("jwt-token-xxx", token);
         verify(userMapper).insert(any(User.class));
     }
 
@@ -146,10 +143,9 @@ class UserModuleTest {
         req.setEmail(TEST_EMAIL);
         req.setPassword(TEST_PASSWORD);
 
-        BaseResult<String> result = authService.login(req);
+        String token = authService.login(req);
 
-        assertTrue(result.getSuccess());
-        assertEquals("jwt-login-token", result.getData());
+        assertEquals("jwt-login-token", token);
     }
 
     @Test
@@ -186,9 +182,8 @@ class UserModuleTest {
     @Order(10)
     @DisplayName("logout - 退出登录清理 Redis")
     void testLogout() {
-        BaseResult<Void> result = authService.logout(TEST_USER_ID);
+        authService.logout(TEST_USER_ID);
 
-        assertTrue(result.getSuccess());
         verify(jwtUtil).invalidateToken(TEST_USER_ID);
     }
 
@@ -201,12 +196,11 @@ class UserModuleTest {
                 .email(TEST_EMAIL).build();
         when(userMapper.selectById(TEST_USER_ID)).thenReturn(user);
 
-        BaseResult<UserInfoVO> result = userService.getUserInfo(TEST_USER_ID);
+        UserInfoResponse info = userService.getUserInfo(TEST_USER_ID);
 
-        assertTrue(result.getSuccess());
-        assertEquals(TEST_USER_ID, result.getData().getId());
-        assertEquals(TEST_NICKNAME, result.getData().getNickName());
-        assertEquals(TEST_EMAIL, result.getData().getEmail());
+        assertEquals(TEST_USER_ID, info.getId());
+        assertEquals(TEST_NICKNAME, info.getNickName());
+        assertEquals(TEST_EMAIL, info.getEmail());
     }
 
     @Test

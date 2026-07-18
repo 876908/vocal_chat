@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vocalchat.common.enums.ErrorEnum;
 import org.example.vocalchat.common.exception.BaseException;
-import org.example.vocalchat.common.result.BaseResult;
 import org.example.vocalchat.common.util.JwtUtil;
 import org.example.vocalchat.dto.request.LoginRequest;
 import org.example.vocalchat.dto.request.RegisterRequest;
@@ -33,7 +32,7 @@ public class AuthServiceImpl implements AuthService {
     private final EmailService emailService;
 
     @Override
-    public BaseResult<String> register(RegisterRequest request) {
+    public String register(RegisterRequest request) {
         if (!PASSWORD_PATTERN.matcher(request.getPassword()).matches()) {
             throw new BaseException(ErrorEnum.PASSWORD_WEAK);
         }
@@ -59,11 +58,11 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateToken(Map.of("userId", user.getId()));
 
         log.info("用户注册成功: email={}, id={}", request.getEmail(), user.getId());
-        return BaseResult.success(token);
+        return token;
     }
 
     @Override
-    public BaseResult<String> login(LoginRequest request) {
+    public String login(LoginRequest request) {
         User user = userMapper.selectByEmail(request.getEmail());
         if (user == null) {
             throw new BaseException(ErrorEnum.USER_NOT_FOUND);
@@ -76,22 +75,20 @@ public class AuthServiceImpl implements AuthService {
         String token = jwtUtil.generateToken(Map.of("userId", user.getId()));
 
         log.info("用户登录成功: email={}, id={}", request.getEmail(), user.getId());
-        return BaseResult.success(token);
+        return token;
     }
 
     @Override
-    public BaseResult<Void> sendVerificationCode(String email) {
+    public void sendVerificationCode(String email) {
         User user = userMapper.selectByEmail(email);
         if (user != null) {
             throw new BaseException(ErrorEnum.EMAIL_EXISTS);
         }
         emailService.sendVerificationCode(email);
-        return BaseResult.success();
     }
 
     @Override
-    public BaseResult<Void> logout(String userId) {
+    public void logout(String userId) {
         jwtUtil.invalidateToken(userId);
-        return BaseResult.success();
     }
 }
