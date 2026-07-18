@@ -33,13 +33,13 @@ public class ControllerLogAspect {
             Object result = joinPoint.proceed();
             long cost = System.currentTimeMillis() - start;
             String resultStr = formatResult(result);
-            log.info("=捕获响应= 操作描述：{} 请求地址：{} 请求参数：{} 请求返回：{} 请求用户：{} 请求耗时：{}ms =释放响应=",
+            log.info("=捕获响应=\n操作描述：{}\n请求地址：{}\n请求参数：{}\n请求返回：{}\n请求用户：{}\n请求耗时：{}ms\n=释放响应=",
                     operation, uri, params, resultStr, user, cost);
             return result;
         } catch (Throwable e) {
             long cost = System.currentTimeMillis() - start;
-            log.error("=捕获响应= 操作描述：{} 请求地址：{} 请求参数：{} 请求异常：{} 请求用户：{} 请求耗时：{}ms =释放响应=",
-                    operation, uri, params, e.getMessage(), user, cost, e);
+            log.error("=捕获响应=\n操作描述：{}\n请求地址：{}\n请求参数：{}\n请求异常：{}\n请求用户：{}\n请求耗时：{}ms\n=释放响应=",
+                    operation, uri, params, e.getMessage(), user, cost);
             throw e;
         }
     }

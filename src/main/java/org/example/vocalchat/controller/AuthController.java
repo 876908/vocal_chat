@@ -3,6 +3,7 @@ package org.example.vocalchat.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.example.vocalchat.common.annotation.AutoResult;
+import org.example.vocalchat.common.annotation.LogOperation;
 import org.example.vocalchat.common.annotation.SkipToken;
 import org.example.vocalchat.common.context.UserContext;
 import org.example.vocalchat.dto.request.LoginRequest;
@@ -23,7 +24,7 @@ public class AuthController {
     public String register(@Valid @RequestBody RegisterRequest request) {
         return authService.register(request);
     }
-
+    @LogOperation("用户登录")
     @SkipToken
     @PostMapping("/login")
     public String login(@Valid @RequestBody LoginRequest request) {
