@@ -2,6 +2,9 @@ spring:
   application:
     name: vocal-chat
     version: 1.0.0
+  docker:
+    compose:
+      enabled: false
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -25,3 +28,5 @@ mybatis-plus:
 jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:3600000}
+server:
+    port: 8081
