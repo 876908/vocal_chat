@@ -19,6 +19,7 @@ public class AuthController {
 
     private final AuthService authService;
 
+    @LogOperation("用户注册")
     @SkipToken
     @PostMapping("/register")
     public String register(@Valid @RequestBody RegisterRequest request) {
@@ -31,12 +32,14 @@ public class AuthController {
         return authService.login(request);
     }
 
+    @LogOperation("获取验证码")
     @SkipToken
     @PostMapping("/getVerificationCode")
     public void getVerificationCode(@RequestParam String email) {
         authService.sendVerificationCode(email);
     }
 
+    @LogOperation("用户登出")
     @PostMapping("/logout")
     public void logout() {
         authService.logout(UserContext.getUserId());
