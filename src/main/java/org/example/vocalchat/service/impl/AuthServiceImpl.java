@@ -14,7 +14,6 @@ import org.example.vocalchat.service.AuthService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.UUID;
 import java.util.regex.Pattern;
 
@@ -55,7 +54,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         userMapper.insert(user);
 
-        String token = jwtUtil.generateToken(Map.of("userId", user.getId()));
+        String token = jwtUtil.generateToken(user.getId());
 
         log.info("用户注册成功: email={}, id={}", request.getEmail(), user.getId());
         return token;
@@ -72,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
             throw new BaseException(ErrorEnum.PASSWORD_ERROR);
         }
 
-        String token = jwtUtil.generateToken(Map.of("userId", user.getId()));
+        String token = jwtUtil.generateToken(user.getId());
 
         log.info("用户登录成功: email={}, id={}", request.getEmail(), user.getId());
         return token;

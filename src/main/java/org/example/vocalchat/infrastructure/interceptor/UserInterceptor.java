@@ -44,7 +44,7 @@ public class UserInterceptor implements HandlerInterceptor {
         }
 
         var claims = jwtUtil.parseJWT(token);
-        String userId = claims.get("userId", String.class);
+        String userId = claims.getSubject();
         UserContext.set(userId, token);
         return true;
     }
