@@ -13,7 +13,6 @@ import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Date;
-import java.util.Map;
 
 @Component
 public class JwtUtil {
@@ -33,12 +32,11 @@ public class JwtUtil {
         this.redisTemplate = redisTemplate;
     }
 
-    public String generateToken(Map<String, Object> claims) {
-        String userId = (String) claims.get("userId");
+    public String generateToken(String userId) {
         long ttlMillis = expiration > 0 ? expiration : DEFAULT_TTL_SECONDS * 1000;
 
         String token = Jwts.builder()
-                .claims(claims)
+                .subject(userId)
                 .expiration(new Date(System.currentTimeMillis() + ttlMillis))
                 .signWith(key)
                 .compact();
@@ -55,7 +53,7 @@ public class JwtUtil {
                 .parseSignedClaims(token)
                 .getPayload();
 
-        String userId = claims.get("userId", String.class);
+        String userId = claims.getSubject();
         String stored = redisTemplate.opsForValue().get("user:" + userId);
         if (stored == null || !stored.equals(token)) {
             throw new BaseException(ErrorEnum.TOKEN_EXPIRED);
