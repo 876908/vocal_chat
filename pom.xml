@@ -105,6 +105,17 @@
             <artifactId>langchain4j-community-dashscope</artifactId>
             <version>1.17.2-beta27</version>
         </dependency>
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+	        <artifactId>langchain4j-open-ai-spring-boot-starter</artifactId>
+	        <version>1.0.0-beta3</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/dev.langchain4j/langchain4j-community-dashscope -->
+        <dependency>
+            <groupId>dev.langchain4j</groupId>
+            <artifactId>langchain4j-community-dashscope</artifactId>
+            <version>1.0.0-beta3</version>
+        </dependency>
 
         <!-- Object Storage -->
         <dependency>
