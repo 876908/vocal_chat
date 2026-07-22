@@ -29,6 +29,8 @@ public enum ErrorEnum {
     KNOWLEDGE_BASE_NOT_FOUND(4002, "知识库不存在"),
     FILE_UPLOAD_FAILED(4003, "文件上传失败"),
     AGENT_LOOP_EXCEEDED(4004, "Agent 执行轮次超限"),
+    OBJECT_STORAGE_ERROR(4005, "对象存储操作失败"),
+    LLM_CALL_FAILED(4006, "LLM 调用失败"),
     ;
 
     private final Integer code;
