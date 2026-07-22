@@ -58,11 +58,12 @@ services:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - JWT_SECRET=${JWT_SECRET}
       - JWT_EXPIRATION=${JWT_EXPIRATION}
-      - RESEND_API_KEY=${RESEND_API_KEY}
-      - RESEND_FROM_EMAIL=${RESEND_FROM_EMAIL}
+      - DASHSCOPE_API_KEY=${DASHSCOPE_API_KEY}
       - MINIO_ENDPOINT=http://minio:9000
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+      - OBJECT_STORAGE_PROVIDER=minio
+      - OBJECT_STORAGE_BUCKET=${OBJECT_STORAGE_BUCKET:-vocal-chat}
     depends_on:
       mysql:
         condition: service_healthy
