@@ -10,3 +10,30 @@ CREATE TABLE IF NOT EXISTS `user` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   INDEX `idx_email` (`email`)
 ) COMMENT '用户表';
+
+CREATE TABLE IF NOT EXISTS `knowledge_base` (
+  `id` VARCHAR(36) PRIMARY KEY COMMENT '主键，UUID',
+  `user_id` VARCHAR(36) NOT NULL COMMENT '用户ID',
+  `name` VARCHAR(100) NOT NULL COMMENT '知识库名称',
+  `description` VARCHAR(200) DEFAULT NULL COMMENT '知识库描述',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' COMMENT 'ACTIVE/DELETED',
+  `document_count` INT DEFAULT 0 COMMENT '文档数量',
+  `chunk_count` INT DEFAULT 0 COMMENT '切片数量',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  INDEX `idx_kb_user_id` (`user_id`)
+) COMMENT '知识库表';
+
+CREATE TABLE IF NOT EXISTS `knowledge_base_file` (
+  `id` VARCHAR(36) PRIMARY KEY COMMENT '主键，UUID',
+  `knowledge_base_id` VARCHAR(36) NOT NULL COMMENT '知识库ID',
+  `file_name` VARCHAR(255) NOT NULL COMMENT '原始文件名',
+  `file_type` VARCHAR(20) NOT NULL COMMENT '文件类型 pdf/txt/md/docx',
+  `file_size` BIGINT DEFAULT 0 COMMENT '文件大小(字节)',
+  `storage_key` VARCHAR(500) NOT NULL COMMENT '对象存储key',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'UPLOADING' COMMENT 'UPLOADING/UPLOADED/PROCESSING/COMPLETED/FAILED',
+  `chunk_count` INT DEFAULT 0 COMMENT '切片数量',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  INDEX `idx_kbf_kb_id` (`knowledge_base_id`)
+) COMMENT '知识库文件表';

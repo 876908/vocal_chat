@@ -1,0 +1,10 @@
+2026/07/14 20:50:41 [error] 108620#122212: *2 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: , request: "GET /api/health HTTP/1.1", upstream: "http://127.0.0.1:8080/api/health", host: "localhost:3000"
+2026/07/14 20:59:28 [error] 108620#122212: *4 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: , request: "POST /api/public/user/login HTTP/1.1", upstream: "http://127.0.0.1:8080/api/public/user/login", host: "localhost:3000", referrer: "http://localhost:3000/static/"
+2026/07/14 20:59:29 [error] 108620#122212: *5 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: , request: "POST /api/public/user/login HTTP/1.1", upstream: "http://127.0.0.1:8080/api/public/user/login", host: "localhost:3000", referrer: "http://localhost:3000/static/"
+2026/07/14 20:59:50 [notice] 134324#132836: signal process started
+2026/07/14 21:07:21 [notice] 68008#97936: signal process started
+2026/07/14 21:07:21 [error] 68008#97936: CreateFile() "./logs/nginx.pid" failed (2: The system cannot find the file specified)
+2026/07/14 21:43:22 [error] 134184#84972: *2 connect() failed (10061: No connection could be made because the target machine actively refused it) while connecting to upstream, client: 127.0.0.1, server: , request: "POST /api/public/user/login HTTP/1.1", upstream: "http://127.0.0.1:8080/api/public/user/login", host: "localhost:3000", referrer: "http://localhost:3000/static/"
+2026/07/14 21:43:42 [notice] 119368#117736: signal process started
+2026/07/17 01:15:29 [alert] 31164#16120: the event "ngx_master_31164" was not signaled for 5s
+2026/07/17 01:15:29 [alert] 31164#16120: could not respawn worker
