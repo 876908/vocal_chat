@@ -19,6 +19,13 @@ public enum ErrorEnum {
     PASSWORD_ERROR(2002, "密码错误"),
     USERNAME_EXISTS(2003, "用户名已存在"),
     EMAIL_EXISTS(2004, "邮箱已注册"),
+    ACCOUNT_LOCKED(2005, "账户已被锁定，请24小时后重试"),
+    ACCOUNT_DISABLED(2006, "账户已被禁用"),
+    PASSWORD_WEAK(2007, "密码需8-20位且包含字母和数字"),
+    PASSWORD_NOT_MATCH(2008, "两次输入的密码不一致"),
+    EMAIL_NOT_VERIFIED(2009, "邮箱未验证，请先验证邮箱"),
+    VERIFICATION_CODE_ERROR(2010, "验证码错误"),
+    VERIFICATION_CODE_EXPIRED(2011, "验证码已过期"),
 
     // === 参数校验 3xxx ===
     PARAM_ERROR(3001, "参数错误"),
