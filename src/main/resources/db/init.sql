@@ -10,3 +10,24 @@ CREATE TABLE IF NOT EXISTS `user` (
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   INDEX `idx_email` (`email`)
 ) COMMENT '用户表';
+
+CREATE TABLE IF NOT EXISTS `ai_assistant` (
+  `id` VARCHAR(36) PRIMARY KEY COMMENT '助手ID (UUID)',
+  `user_id` VARCHAR(36) NOT NULL COMMENT '所属用户ID',
+  `name` VARCHAR(50) NOT NULL COMMENT '助手名称',
+  `description` VARCHAR(200) DEFAULT '' COMMENT '助手描述',
+  `assistant_character` VARCHAR(500) DEFAULT '' COMMENT '角色设定',
+  `knowledge_base_id` VARCHAR(36) DEFAULT NULL COMMENT '关联知识库ID',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  INDEX `idx_user_id` (`user_id`)
+) COMMENT 'AI助手表';
+
+CREATE TABLE IF NOT EXISTS `dialogue` (
+  `id` VARCHAR(36) PRIMARY KEY COMMENT '对话ID (UUID)',
+  `ai_assistant_id` VARCHAR(36) NOT NULL COMMENT '所属助手ID',
+  `contexts` TEXT COMMENT '对话上下文 (JSON)',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  INDEX `idx_ai_assistant_id` (`ai_assistant_id`)
+) COMMENT '对话记录表';

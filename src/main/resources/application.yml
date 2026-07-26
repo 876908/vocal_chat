@@ -29,3 +29,11 @@ jwt:
 resend:
   api-key: ${RESEND_API_KEY:}
   from-email: ${RESEND_FROM_EMAIL:noreply@vocalchat.com}
+
+langchain4j:
+  openai:
+    api-key: ${DASHSCOPE_API_KEY:}
+    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model-name: qwen-plus
+    temperature: 0.7
+    max-tokens: 4096
