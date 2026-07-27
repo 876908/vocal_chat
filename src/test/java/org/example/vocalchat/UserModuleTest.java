@@ -137,8 +137,7 @@ class UserModuleTest {
                 .password(hashedPassword).nickName(TEST_NICKNAME)
                 .build();
 
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
-        when(jwtUtil.generateToken(anyString())).thenReturn("jwt-login-token");
+       
 
         LoginRequest req = new LoginRequest();
         req.setEmail(TEST_EMAIL);
