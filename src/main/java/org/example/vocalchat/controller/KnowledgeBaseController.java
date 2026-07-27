@@ -24,7 +24,6 @@ public class KnowledgeBaseController {
     private final KnowledgeBaseService knowledgeBaseService;
     private final KnowledgeBaseFileService knowledgeBaseFileService;
 
-    // ==================== 知识库 CRUD ====================
 
     @PostMapping
     public void create(@Valid @RequestBody CreateKnowledgeBaseRequest request) {
@@ -52,7 +51,6 @@ public class KnowledgeBaseController {
         knowledgeBaseService.delete(UserContext.getUserId(), id);
     }
 
-    // ==================== 文件管理 ====================
 
     @PostMapping("/{id}/file")
     public KnowledgeBaseFileVO uploadFile(@PathVariable String id,

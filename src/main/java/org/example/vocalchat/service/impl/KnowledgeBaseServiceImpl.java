@@ -47,7 +47,11 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
 
     @Override
     public List<KnowledgeBaseVO> list(String userId) {
-        List<KnowledgeBase> kbList = knowledgeBaseMapper.selectByUserId(userId);
+        List<KnowledgeBase> kbList = knowledgeBaseMapper.selectList(
+                new LambdaQueryWrapper<KnowledgeBase>()
+                        .eq(KnowledgeBase::getUserId, userId)
+                        .eq(KnowledgeBase::getStatus, "ACTIVE")
+                        .orderByDesc(KnowledgeBase::getCreatedAt));
         return kbList.stream()
                 .map(this::toVO)
                 .collect(Collectors.toList());
@@ -73,8 +77,9 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
     public void delete(String userId, String kbId) {
         KnowledgeBase kb = findOwned(userId, kbId);
 
-        // 级联删除所有文件（MinIO + 数据库）
-        List<KnowledgeBaseFile> files = knowledgeBaseFileMapper.selectByKnowledgeBaseId(kbId);
+        List<KnowledgeBaseFile> files = knowledgeBaseFileMapper.selectList(
+                new LambdaQueryWrapper<KnowledgeBaseFile>()
+                        .eq(KnowledgeBaseFile::getKnowledgeBaseId, kbId));
         for (KnowledgeBaseFile file : files) {
             minIOStorageService.delete(file.getStorageKey());
             knowledgeBaseFileMapper.deleteById(file.getId());
@@ -85,9 +90,6 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
         log.info("知识库删除成功: id={}, name={}", kbId, kb.getName());
     }
 
-    /**
-     * 查找属于当前用户的知识库，不存在或无权限则抛异常。
-     */
     private KnowledgeBase findOwned(String userId, String kbId) {
         KnowledgeBase kb = knowledgeBaseMapper.selectById(kbId);
         if (kb == null) {

@@ -26,14 +26,6 @@ public class MinIOStorageService {
     @Value("${minio.endpoint}")
     private String endpoint;
 
-    /**
-     * 上传文件到 MinIO。
-     *
-     * @param file       上传的文件
-     * @param userId     用户 ID
-     * @param kbId       知识库 ID
-     * @return storageKey 对象存储 key
-     */
     public String upload(MultipartFile file, String userId, String kbId) {
         ensureBucketExists();
 
@@ -59,11 +51,6 @@ public class MinIOStorageService {
         }
     }
 
-    /**
-     * 从 MinIO 删除文件。
-     *
-     * @param storageKey 对象存储 key
-     */
     public void delete(String storageKey) {
         try {
             minioClient.removeObject(RemoveObjectArgs.builder()
@@ -76,12 +63,6 @@ public class MinIOStorageService {
         }
     }
 
-    /**
-     * 生成预签名 URL（有效期 7 天），用于前端下载/预览。
-     *
-     * @param storageKey 对象存储 key
-     * @return 预签名 URL
-     */
     public String getPresignedUrl(String storageKey) {
         try {
             return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()

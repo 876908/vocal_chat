@@ -1,5 +1,6 @@
 package org.example.vocalchat.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vocalchat.common.enums.ErrorEnum;
@@ -34,13 +35,11 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
     @Override
     @Transactional
     public KnowledgeBaseFileVO upload(String userId, String kbId, MultipartFile file) {
-        // 验证知识库存在且属于当前用户
         KnowledgeBase kb = knowledgeBaseMapper.selectById(kbId);
         if (kb == null || !kb.getUserId().equals(userId)) {
             throw new BaseException(ErrorEnum.KNOWLEDGE_BASE_NOT_FOUND);
         }
 
-        // 校验文件类型
         String originalFilename = file.getOriginalFilename();
         String extension = getExtension(originalFilename);
         if (extension == null || !ALLOWED_EXTENSIONS.contains(extension.toLowerCase())) {
@@ -48,7 +47,6 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
                     "不支持的文件类型: " + extension + "，仅支持 PDF/TXT/MD/DOCX");
         }
 
-        // 先入库（状态 UPLOADING）
         String fileId = UUID.randomUUID().toString();
         KnowledgeBaseFile kbFile = KnowledgeBaseFile.builder()
                 .id(fileId)
@@ -62,7 +60,6 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
                 .build();
         knowledgeBaseFileMapper.insert(kbFile);
 
-        // 上传到 MinIO
         String storageKey;
         try {
             storageKey = minIOStorageService.upload(file, userId, kbId);
@@ -72,12 +69,10 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
             throw e;
         }
 
-        // 更新状态为 COMPLETED（后续对接 Easy RAG 后状态流转为 PROCESSING → COMPLETED）
         kbFile.setStorageKey(storageKey);
         kbFile.setStatus("COMPLETED");
         knowledgeBaseFileMapper.updateById(kbFile);
 
-        // 更新知识库文档计数
         knowledgeBaseMapper.incrementDocumentCount(kbId, 1);
 
         log.info("知识库文件上传成功: kbId={}, fileId={}, fileName={}, size={}",
@@ -93,7 +88,9 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
             throw new BaseException(ErrorEnum.KNOWLEDGE_BASE_NOT_FOUND);
         }
 
-        List<KnowledgeBaseFile> files = knowledgeBaseFileMapper.selectByKnowledgeBaseId(kbId);
+        List<KnowledgeBaseFile> files = knowledgeBaseFileMapper.selectList(
+                new LambdaQueryWrapper<KnowledgeBaseFile>()
+                        .eq(KnowledgeBaseFile::getKnowledgeBaseId, kbId));
         return files.stream()
                 .map(this::toVO)
                 .collect(Collectors.toList());
@@ -107,18 +104,18 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
             throw new BaseException(ErrorEnum.KNOWLEDGE_BASE_NOT_FOUND);
         }
 
-        KnowledgeBaseFile kbFile = knowledgeBaseFileMapper.selectByKbIdAndFileId(kbId, fileId);
+        KnowledgeBaseFile kbFile = knowledgeBaseFileMapper.selectOne(
+                new LambdaQueryWrapper<KnowledgeBaseFile>()
+                        .eq(KnowledgeBaseFile::getKnowledgeBaseId, kbId)
+                        .eq(KnowledgeBaseFile::getId, fileId));
         if (kbFile == null) {
             throw new BaseException(ErrorEnum.PARAM_ERROR.getCode(), "文件不存在");
         }
 
-        // 删除 MinIO 中的文件
         minIOStorageService.delete(kbFile.getStorageKey());
 
-        // 删除数据库记录
         knowledgeBaseFileMapper.deleteById(fileId);
 
-        // 更新知识库文档计数
         knowledgeBaseMapper.incrementDocumentCount(kbId, -1);
 
         log.info("知识库文件删除成功: kbId={}, fileId={}, fileName={}", kbId, fileId, kbFile.getFileName());
@@ -131,7 +128,10 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
             throw new BaseException(ErrorEnum.KNOWLEDGE_BASE_NOT_FOUND);
         }
 
-        KnowledgeBaseFile kbFile = knowledgeBaseFileMapper.selectByKbIdAndFileId(kbId, fileId);
+        KnowledgeBaseFile kbFile = knowledgeBaseFileMapper.selectOne(
+                new LambdaQueryWrapper<KnowledgeBaseFile>()
+                        .eq(KnowledgeBaseFile::getKnowledgeBaseId, kbId)
+                        .eq(KnowledgeBaseFile::getId, fileId));
         if (kbFile == null) {
             throw new BaseException(ErrorEnum.PARAM_ERROR.getCode(), "文件不存在");
         }
