@@ -6,4 +6,5 @@ import org.example.vocalchat.entity.User;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
+    User selectByEmail(String email);
 }
