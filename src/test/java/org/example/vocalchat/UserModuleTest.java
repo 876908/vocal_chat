@@ -68,7 +68,7 @@ class UserModuleTest {
     void testRegisterSuccess() {
         when(userMapper.selectOne(any())).thenReturn(null);
         when(emailService.verifyCode(TEST_EMAIL, "123456")).thenReturn(true);
-        when(jwtUtil.generateToken(anyMap())).thenReturn("jwt-token-xxx");
+        when(jwtUtil.generateToken(anyString())).thenReturn("jwt-token-xxx");
 
         RegisterRequest req = new RegisterRequest();
         req.setNickName(TEST_NICKNAME);
@@ -136,8 +136,9 @@ class UserModuleTest {
                 .id(TEST_USER_ID).email(TEST_EMAIL)
                 .password(hashedPassword).nickName(TEST_NICKNAME)
                 .build();
-        when(userMapper.selectOne(any())).thenReturn(user);
-        when(jwtUtil.generateToken(anyMap())).thenReturn("jwt-login-token");
+
+        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
+        when(jwtUtil.generateToken(anyString())).thenReturn("jwt-login-token");
 
         LoginRequest req = new LoginRequest();
         req.setEmail(TEST_EMAIL);
