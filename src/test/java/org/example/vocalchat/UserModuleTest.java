@@ -157,7 +157,7 @@ class UserModuleTest {
         User user = User.builder()
                 .id(TEST_USER_ID).email(TEST_EMAIL)
                 .password(hashedPassword).build();
-        when(userMapper.selectOne(any())).thenReturn(user);
+        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
 
         LoginRequest req = new LoginRequest();
         req.setEmail(TEST_EMAIL);
@@ -170,7 +170,7 @@ class UserModuleTest {
     @Order(9)
     @DisplayName("login - 用户不存在")
     void testLoginUserNotFound() {
-        when(userMapper.selectOne(any())).thenReturn(null);
+        when(userMapper.selectByEmail("ghost@test.com")).thenReturn(null);
 
         LoginRequest req = new LoginRequest();
         req.setEmail("ghost@test.com");
