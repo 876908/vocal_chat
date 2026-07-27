@@ -64,7 +64,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequest request) {
-        User user = userMapper.selectByEmail(request.getEmail());
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getEmail, request.getEmail()));
         if (user == null) {
             throw new BaseException(ErrorEnum.USER_NOT_FOUND);
         }

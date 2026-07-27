@@ -137,7 +137,7 @@ class UserModuleTest {
                 .password(hashedPassword).nickName(TEST_NICKNAME)
                 .build();
 
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
+        when(userMapper.selectOne(any())).thenReturn(user);
         when(jwtUtil.generateToken(anyString())).thenReturn("jwt-login-token");
 
         LoginRequest req = new LoginRequest();
@@ -157,7 +157,7 @@ class UserModuleTest {
         User user = User.builder()
                 .id(TEST_USER_ID).email(TEST_EMAIL)
                 .password(hashedPassword).build();
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
+        when(userMapper.selectOne(any())).thenReturn(user);
 
         LoginRequest req = new LoginRequest();
         req.setEmail(TEST_EMAIL);
@@ -170,7 +170,7 @@ class UserModuleTest {
     @Order(9)
     @DisplayName("login - 用户不存在")
     void testLoginUserNotFound() {
-        when(userMapper.selectByEmail("ghost@test.com")).thenReturn(null);
+        when(userMapper.selectOne(any())).thenReturn(null);
 
         LoginRequest req = new LoginRequest();
         req.setEmail("ghost@test.com");
