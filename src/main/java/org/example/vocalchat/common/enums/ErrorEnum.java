@@ -31,6 +31,8 @@ public enum ErrorEnum {
     AGENT_LOOP_EXCEEDED(4004, "Agent 执行轮次超限"),
     OBJECT_STORAGE_ERROR(4005, "对象存储操作失败"),
     LLM_CALL_FAILED(4006, "LLM 调用失败"),
+    EMAIL_RATE_LIMIT(4007, "发送过于频繁，请60秒后再试"),
+    EMAIL_SEND_FAILED(4008, "邮件发送失败，请稍后重试"),
     ;
 
     private final Integer code;
