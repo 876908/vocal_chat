@@ -3,18 +3,21 @@ package org.example.vocalchat.common.util;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.example.vocalchat.common.enums.ErrorEnum;
+import org.example.vocalchat.common.exception.BaseException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 @Component
 public class JwtUtil {
+
+    private static final long DEFAULT_TTL_SECONDS = 86400;
 
     private final SecretKey key;
     private final StringRedisTemplate redisTemplate;
@@ -29,34 +32,37 @@ public class JwtUtil {
         this.redisTemplate = redisTemplate;
     }
 
-    public String generateToken(Map<String, Object> claims) {
+    public String generateToken(String userId) {
+        long ttlMillis = expiration > 0 ? expiration : DEFAULT_TTL_SECONDS * 1000;
+
         String token = Jwts.builder()
-                .claims(claims)
-                .expiration(new Date(System.currentTimeMillis() + expiration))
+                .subject(userId)
+                .expiration(new Date(System.currentTimeMillis() + ttlMillis))
                 .signWith(key)
                 .compact();
 
-        String redisKey = "token:" + token;
-        redisTemplate.opsForValue().set(redisKey, "1", expiration, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set("user:" + userId, token, Duration.ofMillis(ttlMillis));
 
         return token;
     }
 
-    public Claims parseJWT(String jwt) {
-        String redisKey = "token:" + jwt;
-        String value = redisTemplate.opsForValue().get(redisKey);
-        if (value == null) {
-            throw new RuntimeException("Token 已失效或不存在");
-        }
-
-        return Jwts.parser()
+    public Claims parseJWT(String token) {
+        Claims claims = Jwts.parser()
                 .verifyWith(key)
                 .build()
-                .parseSignedClaims(jwt)
+                .parseSignedClaims(token)
                 .getPayload();
+
+        String userId = claims.getSubject();
+        String stored = redisTemplate.opsForValue().get("user:" + userId);
+        if (stored == null || !stored.equals(token)) {
+            throw new BaseException(ErrorEnum.TOKEN_EXPIRED);
+        }
+
+        return claims;
     }
 
-    public void invalidateToken(String jwt) {
-        redisTemplate.delete("token:" + jwt);
+    public void invalidateToken(String userId) {
+        redisTemplate.delete("user:" + userId);
     }
 }
