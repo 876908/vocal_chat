@@ -39,6 +39,11 @@ public enum ErrorEnum {
     EMAIL_RATE_LIMIT(4005, "发送过于频繁，请60秒后再试"),
     EMAIL_SEND_FAILED(4006, "邮件发送失败，请稍后重试"),
     FILE_DELETE_FAILED(4007, "文件删除失败"),
+    ASSISTANT_ACCESS_DENIED(4007, "无权访问该 AI 助手"),
+    DIALOGUE_NOT_FOUND(4008, "对话记录不存在"),
+    LLM_CALL_FAILED(4009, "大模型调用失败"),
+    SSE_TIMEOUT(4010, "SSE 连接超时"),
+    FILE_NOT_FOUND(4011, "文件不存在"),
     ;
 
     private final Integer code;
