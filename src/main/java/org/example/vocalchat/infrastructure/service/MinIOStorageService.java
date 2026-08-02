@@ -60,6 +60,7 @@ public class MinIOStorageService {
             log.info("文件删除成功: bucket={}, key={}", BUCKET_NAME, storageKey);
         } catch (Exception e) {
             log.error("文件删除失败: key={}", storageKey, e);
+            throw new BaseException(ErrorEnum.FILE_DELETE_FAILED);
         }
     }
 
