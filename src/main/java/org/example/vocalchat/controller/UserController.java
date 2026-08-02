@@ -2,6 +2,7 @@ package org.example.vocalchat.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.example.vocalchat.common.annotation.AutoResult;
+import org.example.vocalchat.common.annotation.LogOperation;
 import org.example.vocalchat.common.context.UserContext;
 import org.example.vocalchat.dto.response.UserInfoResponse;
 import org.example.vocalchat.service.UserService;
@@ -17,6 +18,7 @@ public class UserController {
 
     private final UserService userService;
 
+    @LogOperation("获取用户信息")
     @GetMapping("/info")
     public UserInfoResponse getInfo() {
         return userService.getUserInfo(UserContext.getUserId());

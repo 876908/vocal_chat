@@ -20,6 +20,15 @@ public final class UserContext {
         return TOKEN.get();
     }
 
+    public static String requireUserId() {
+        String userId = USER_ID.get();
+        if (userId == null) {
+            throw new org.example.vocalchat.common.exception.BaseException(
+                    org.example.vocalchat.common.enums.ErrorEnum.TOKEN_MISSING);
+        }
+        return userId;
+    }
+
     public static void clear() {
         USER_ID.remove();
         TOKEN.remove();

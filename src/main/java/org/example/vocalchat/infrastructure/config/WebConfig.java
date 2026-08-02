@@ -1,9 +1,9 @@
 package org.example.vocalchat.infrastructure.config;
 
 import lombok.RequiredArgsConstructor;
-import org.example.vocalchat.infrastructure.interceptor.RequestLogInterceptor;
 import org.example.vocalchat.infrastructure.interceptor.UserInterceptor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -11,15 +11,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    private final RequestLogInterceptor requestLogInterceptor;
     private final UserInterceptor userInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(requestLogInterceptor)
-                .addPathPatterns("/**")
-                .order(1);
-
         registry.addInterceptor(userInterceptor)
                 .addPathPatterns("/**")
                 .excludePathPatterns(
@@ -28,6 +23,15 @@ public class WebConfig implements WebMvcConfigurer {
                         "/api/public/user/getVerificationCode",
                         "/error"
                 )
-                .order(2);
+                .order(1);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOriginPatterns("*")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("*")
+                .allowCredentials(true);
     }
 }
