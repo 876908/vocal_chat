@@ -40,6 +40,7 @@ public enum ErrorEnum {
     LLM_CALL_FAILED(4006, "LLM 调用失败"),
     EMAIL_RATE_LIMIT(4007, "发送过于频繁，请60秒后再试"),
     EMAIL_SEND_FAILED(4008, "邮件发送失败，请稍后重试"),
+    ASSISTANT_ACCESS_DENIED(4009, "AI 助手访问被拒绝"),
     ;
 
     private final Integer code;
