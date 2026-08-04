@@ -59,24 +59,26 @@ CREATE TABLE IF NOT EXISTS `knowledge_base` (
   `chunk_count` INT DEFAULT 0 COMMENT '切片数量',
   `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  INDEX `idx_user_id` (`user_id`)
-) ENGINE=InnoDB COMMENT '知识库元数据表';
+  INDEX `idx_kb_user_id` (`user_id`)
+)  ENGINE=InnoDB COMMENT '知识库表';
 
 -- ============================================================
 -- 5. 知识库文件表
 -- ============================================================
-CREATE TABLE IF NOT EXISTS `knowledge_base_file` (
-  `id` VARCHAR(36) PRIMARY KEY COMMENT '文件ID (UUID)',
-  `knowledge_base_id` VARCHAR(36) NOT NULL COMMENT '所属知识库ID',
-  `file_name` VARCHAR(255) NOT NULL COMMENT '文件名',
-  `storage_key` VARCHAR(500) NOT NULL COMMENT '对象存储路径/Key',
-  `status` VARCHAR(20) NOT NULL DEFAULT 'UPLOADING' COMMENT '状态：UPLOADING/UPLOADED/PROCESSING/COMPLETED/FAILED',
-  `chunk_count` INT DEFAULT 0 COMMENT '切片数量',
-  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  INDEX `idx_knowledge_base_id` (`knowledge_base_id`)
-) ENGINE=InnoDB COMMENT '知识库文件表';
 
+CREATE TABLE IF NOT EXISTS `knowledge_base_file` (
+                                                     `id` VARCHAR(36) PRIMARY KEY COMMENT '主键，UUID',
+    `knowledge_base_id` VARCHAR(36) NOT NULL COMMENT '知识库ID',
+    `file_name` VARCHAR(255) NOT NULL COMMENT '原始文件名',
+    `file_type` VARCHAR(20) NOT NULL COMMENT '文件类型 pdf/txt/md/docx',
+    `file_size` BIGINT DEFAULT 0 COMMENT '文件大小(字节)',
+    `storage_key` VARCHAR(500) NOT NULL COMMENT '对象存储key',
+    `status` VARCHAR(20) NOT NULL DEFAULT 'UPLOADING' COMMENT 'UPLOADING/UPLOADED/PROCESSING/COMPLETED/FAILED',
+    `chunk_count` INT DEFAULT 0 COMMENT '切片数量',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    INDEX `idx_kbf_kb_id` (`knowledge_base_id`)
+    ) ENGINE=InnoDB COMMENT '知识库文件表';
 -- ============================================================
 -- 6. 语音通话记录表
 -- ============================================================
@@ -108,3 +110,4 @@ CREATE TABLE IF NOT EXISTS `agent_tool_call_log` (
   INDEX `idx_user_id` (`user_id`),
   INDEX `idx_session_id` (`session_id`)
 ) ENGINE=InnoDB COMMENT 'Agent工具调用审计日志表';
+

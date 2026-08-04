@@ -44,7 +44,7 @@ class UserModuleTest {
     @Order(1)
     @DisplayName("sendVerificationCode - 发送验证码成功")
     void testSendVerificationCodeSuccess() {
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(null);
+        when(userMapper.selectOne(any())).thenReturn(null);
 
         authService.sendVerificationCode(TEST_EMAIL);
 
@@ -56,7 +56,7 @@ class UserModuleTest {
     @DisplayName("sendVerificationCode - 邮箱已注册则抛异常")
     void testSendVerificationCodeEmailExists() {
         User existing = User.builder().id(TEST_USER_ID).email(TEST_EMAIL).build();
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(existing);
+        when(userMapper.selectOne(any())).thenReturn(existing);
 
         assertThrows(BaseException.class, () -> authService.sendVerificationCode(TEST_EMAIL));
         verify(emailService, never()).sendVerificationCode(anyString());
@@ -66,7 +66,7 @@ class UserModuleTest {
     @Order(3)
     @DisplayName("register - 注册成功返回 JWT Token")
     void testRegisterSuccess() {
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(null);
+        when(userMapper.selectOne(any())).thenReturn(null);
         when(emailService.verifyCode(TEST_EMAIL, "123456")).thenReturn(true);
         when(jwtUtil.generateToken(anyString())).thenReturn("jwt-token-xxx");
 
@@ -86,7 +86,7 @@ class UserModuleTest {
     @Order(4)
     @DisplayName("register - 验证码错误")
     void testRegisterWrongCode() {
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(null);
+        when(userMapper.selectOne(any())).thenReturn(null);
         when(emailService.verifyCode(TEST_EMAIL, "999999")).thenReturn(false);
 
         RegisterRequest req = new RegisterRequest();
@@ -116,7 +116,7 @@ class UserModuleTest {
     @DisplayName("register - 邮箱已注册")
     void testRegisterEmailExists() {
         User existing = User.builder().id(TEST_USER_ID).email(TEST_EMAIL).build();
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(existing);
+        when(userMapper.selectOne(any())).thenReturn(existing);
 
         RegisterRequest req = new RegisterRequest();
         req.setNickName(TEST_NICKNAME);
@@ -136,7 +136,8 @@ class UserModuleTest {
                 .id(TEST_USER_ID).email(TEST_EMAIL)
                 .password(hashedPassword).nickName(TEST_NICKNAME)
                 .build();
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
+
+        when(userMapper.selectOne(any())).thenReturn(user);
         when(jwtUtil.generateToken(anyString())).thenReturn("jwt-login-token");
 
         LoginRequest req = new LoginRequest();
@@ -156,7 +157,7 @@ class UserModuleTest {
         User user = User.builder()
                 .id(TEST_USER_ID).email(TEST_EMAIL)
                 .password(hashedPassword).build();
-        when(userMapper.selectByEmail(TEST_EMAIL)).thenReturn(user);
+        when(userMapper.selectOne(any())).thenReturn(user);
 
         LoginRequest req = new LoginRequest();
         req.setEmail(TEST_EMAIL);
@@ -169,7 +170,7 @@ class UserModuleTest {
     @Order(9)
     @DisplayName("login - 用户不存在")
     void testLoginUserNotFound() {
-        when(userMapper.selectByEmail("ghost@test.com")).thenReturn(null);
+        when(userMapper.selectOne(any())).thenReturn(null);
 
         LoginRequest req = new LoginRequest();
         req.setEmail("ghost@test.com");
