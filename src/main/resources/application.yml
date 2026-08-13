@@ -2,6 +2,9 @@ spring:
   application:
     name: vocal-chat
     version: 1.0.0
+  docker:
+    compose:
+      enabled: false
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -17,6 +20,10 @@ spring:
       host: ${REDIS_HOST}
       port: ${REDIS_PORT:6379}
       password: ${REDIS_PASSWORD:}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
@@ -26,9 +33,26 @@ jwt:
   secret: ${JWT_SECRET}
   expiration: ${JWT_EXPIRATION:3600000}
 
+server:
+    port: 8081
+
+
 resend:
   api-key: ${RESEND_API_KEY:}
   from-email: ${RESEND_FROM_EMAIL:noreply@example.com}
+
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+
+langchain4j:
+  openai:
+    api-key: ${DASHSCOPE_API_KEY:}
+    base-url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    model-name: qwen-plus
+    temperature: 0.7
+    max-tokens: 4096
 
 vocal-chat:
   llm:
@@ -61,5 +85,3 @@ vocal-chat:
       secret-id: ${COS_SECRET_ID:}
       secret-key: ${COS_SECRET_KEY:}
       public-endpoint: ${COS_PUBLIC_ENDPOINT:}
-
-server.port: 9000

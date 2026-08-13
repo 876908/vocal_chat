@@ -2,9 +2,8 @@ package org.example.vocalchat.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
-import org.example.vocalchat.entity.User;
+import org.example.vocalchat.entity.KnowledgeBaseFile;
 
 @Mapper
-public interface UserMapper extends BaseMapper<User> {
-
+public interface KnowledgeBaseFileMapper extends BaseMapper<KnowledgeBaseFile> {
 }

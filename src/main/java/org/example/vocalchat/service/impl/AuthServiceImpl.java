@@ -1,5 +1,6 @@
 package org.example.vocalchat.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.vocalchat.common.enums.ErrorEnum;
@@ -36,7 +37,8 @@ public class AuthServiceImpl implements AuthService {
             throw new BaseException(ErrorEnum.PASSWORD_WEAK);
         }
 
-        User existing = userMapper.selectByEmail(request.getEmail());
+        User existing = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getEmail, request.getEmail()));
         if (existing != null) {
             throw new BaseException(ErrorEnum.EMAIL_EXISTS);
         }
@@ -62,7 +64,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public String login(LoginRequest request) {
-        User user = userMapper.selectByEmail(request.getEmail());
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getEmail, request.getEmail()));
         if (user == null) {
             throw new BaseException(ErrorEnum.USER_NOT_FOUND);
         }
@@ -79,7 +82,8 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void sendVerificationCode(String email) {
-        User user = userMapper.selectByEmail(email);
+        User user = userMapper.selectOne(
+                new LambdaQueryWrapper<User>().eq(User::getEmail, email));
         if (user != null) {
             throw new BaseException(ErrorEnum.EMAIL_EXISTS);
         }
