@@ -177,8 +177,9 @@ public class AIAssistantService {
         chatMessages.add(UserMessage.from(request.getQuestion()));
 
         StringBuilder fullResponse = new StringBuilder();
+        QwenChatMode mode = resolveMode(request);
         try {
-            qwenChatService.streamChat(chatMessages, QwenChatMode.DEFAULT, new StreamingChatResponseHandler() {
+            qwenChatService.streamChat(chatMessages, mode, new StreamingChatResponseHandler() {
                 @Override
                 public void onPartialResponse(String token) {
                     sendEvent(emitter, "token", token, fullResponse);
@@ -208,6 +209,16 @@ public class AIAssistantService {
         }
 
         return emitter;
+    }
+
+    private QwenChatMode resolveMode(StreamRequest request) {
+        if (request.isEnableDeepThinking()) {
+            return QwenChatMode.DEEP_THINKING;
+        }
+        if (request.isEnableOnlineSearch()) {
+            return QwenChatMode.ONLINE_SEARCH;
+        }
+        return QwenChatMode.DEFAULT;
     }
 
     private AIAssistant getAndValidateOwnership(String assistantId, String userId) {

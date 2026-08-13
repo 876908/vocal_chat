@@ -8,7 +8,8 @@ import org.example.vocalchat.common.exception.BaseException;
 import org.example.vocalchat.dto.response.KnowledgeBaseFileVO;
 import org.example.vocalchat.entity.KnowledgeBase;
 import org.example.vocalchat.entity.KnowledgeBaseFile;
-import org.example.vocalchat.infrastructure.service.MinIOStorageService;
+import org.example.vocalchat.infrastructure.external.storage.ObjectStorageService;
+import org.example.vocalchat.infrastructure.external.storage.StorageObjectKeys;
 import org.example.vocalchat.mapper.KnowledgeBaseFileMapper;
 import org.example.vocalchat.mapper.KnowledgeBaseMapper;
 import org.example.vocalchat.service.KnowledgeBaseFileService;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -30,7 +32,7 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
 
     private final KnowledgeBaseFileMapper knowledgeBaseFileMapper;
     private final KnowledgeBaseMapper knowledgeBaseMapper;
-    private final MinIOStorageService minIOStorageService;
+    private final ObjectStorageService objectStorageService;
 
     @Override
     @Transactional
@@ -60,9 +62,9 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
                 .build();
         knowledgeBaseFileMapper.insert(kbFile);
 
-        String storageKey;
-        try {
-            storageKey = minIOStorageService.upload(file, userId, kbId);
+        String storageKey = StorageObjectKeys.join(userId, kbId, UUID.randomUUID() + extension);
+        try (InputStream inputStream = file.getInputStream()) {
+            objectStorageService.putObject(storageKey, inputStream, file.getSize(), file.getContentType());
         } catch (Exception e) {
             kbFile.setStatus("FAILED");
             knowledgeBaseFileMapper.updateById(kbFile);
@@ -112,7 +114,7 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
             throw new BaseException(ErrorEnum.PARAM_ERROR.getCode(), "文件不存在");
         }
 
-        minIOStorageService.delete(kbFile.getStorageKey());
+        objectStorageService.deleteObject(kbFile.getStorageKey());
 
         knowledgeBaseFileMapper.deleteById(fileId);
 
