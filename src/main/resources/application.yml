@@ -34,7 +34,7 @@ jwt:
   expiration: ${JWT_EXPIRATION:3600000}
 
 server:
-    port: 8081
+    port: 8080
 
 
 resend:
