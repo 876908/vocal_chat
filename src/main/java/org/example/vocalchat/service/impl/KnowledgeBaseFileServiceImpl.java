@@ -68,7 +68,9 @@ public class KnowledgeBaseFileServiceImpl implements KnowledgeBaseFileService {
         } catch (Exception e) {
             kbFile.setStatus("FAILED");
             knowledgeBaseFileMapper.updateById(kbFile);
-            throw e;
+            log.error("Knowledge base file upload failed: kbId={}, fileId={}, storageKey={}",
+                    kbId, fileId, storageKey, e);
+            throw new BaseException(ErrorEnum.FILE_UPLOAD_FAILED, e);
         }
 
         kbFile.setStorageKey(storageKey);
