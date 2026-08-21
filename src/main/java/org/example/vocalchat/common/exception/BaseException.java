@@ -13,8 +13,13 @@ public class BaseException extends RuntimeException {
         this.code = errorEnum.getCode();
     }
 
-    public BaseException(Integer code, String msg) {
-        super(msg);
+    public BaseException(ErrorEnum errorEnum, Throwable cause) {
+        super(errorEnum.getMsg(), cause);
+        this.code = errorEnum.getCode();
+    }
+
+    public BaseException(Integer code, String message) {
+        super(message);
         this.code = code;
     }
 }

@@ -5,6 +5,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.langchain4j.data.message.AiMessage;
+import dev.langchain4j.data.message.ChatMessage;
+import dev.langchain4j.data.message.SystemMessage;
+import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.response.ChatResponse;
+import dev.langchain4j.model.chat.response.PartialThinking;
+import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
 import org.example.vocalchat.common.context.UserContext;
 import org.example.vocalchat.common.enums.ErrorEnum;
 import org.example.vocalchat.common.exception.BaseException;
@@ -14,6 +20,7 @@ import org.example.vocalchat.dto.request.StreamRequest;
 import org.example.vocalchat.dto.response.AIAssistantVO;
 import org.example.vocalchat.entity.AIAssistant;
 import org.example.vocalchat.entity.Dialogue;
+import org.example.vocalchat.infrastructure.external.llm.QwenChatMode;
 import org.example.vocalchat.infrastructure.external.llm.QwenChatService;
 import org.example.vocalchat.mapper.AIAssistantMapper;
 import org.example.vocalchat.mapper.DialogueMapper;
@@ -155,35 +162,63 @@ public class AIAssistantService {
         String systemPrompt = buildSystemPrompt(assistant);
         List<List<String>> historyMessages = parseContexts(dialogue.getContexts());
 
-        List<dev.langchain4j.data.message.ChatMessage> chatHistory = new ArrayList<>();
+        List<ChatMessage> chatMessages = new ArrayList<>();
+        chatMessages.add(SystemMessage.from(systemPrompt));
         for (List<String> entry : historyMessages) {
             if (entry.size() < 2) continue;
             String role = entry.get(0);
             String content = entry.get(1);
             if ("USER".equalsIgnoreCase(role)) {
-                chatHistory.add(dev.langchain4j.data.message.UserMessage.from(content));
+                chatMessages.add(UserMessage.from(content));
             } else if ("ASSISTANT".equalsIgnoreCase(role)) {
-                chatHistory.add(AiMessage.from(content));
+                chatMessages.add(AiMessage.from(content));
             }
         }
+        chatMessages.add(UserMessage.from(request.getQuestion()));
 
         StringBuilder fullResponse = new StringBuilder();
-        qwenChatService.streamChat(
-                systemPrompt, chatHistory, request.getQuestion(),
-                token -> sendEvent(emitter, "token", token, fullResponse),
-                thinking -> sendEvent(emitter, "thinking", thinking, null),
-                () -> {
+        QwenChatMode mode = resolveMode(request);
+        try {
+            qwenChatService.streamChat(chatMessages, mode, new StreamingChatResponseHandler() {
+                @Override
+                public void onPartialResponse(String token) {
+                    sendEvent(emitter, "token", token, fullResponse);
+                }
+
+                @Override
+                public void onPartialThinking(PartialThinking thinking) {
+                    sendEvent(emitter, "thinking", thinking.text(), null);
+                }
+
+                @Override
+                public void onCompleteResponse(ChatResponse response) {
                     stopHeartbeat(heartbeatThread);
                     completeConversation(dialogue, historyMessages, request.getQuestion(),
                             fullResponse.toString(), emitter);
-                },
-                error -> {
+                }
+
+                @Override
+                public void onError(Throwable error) {
                     stopHeartbeat(heartbeatThread);
                     sendError(emitter, error);
                 }
-        );
+            });
+        } catch (RuntimeException e) {
+            stopHeartbeat(heartbeatThread);
+            sendError(emitter, e);
+        }
 
         return emitter;
+    }
+
+    private QwenChatMode resolveMode(StreamRequest request) {
+        if (request.isEnableDeepThinking()) {
+            return QwenChatMode.DEEP_THINKING;
+        }
+        if (request.isEnableOnlineSearch()) {
+            return QwenChatMode.ONLINE_SEARCH;
+        }
+        return QwenChatMode.DEFAULT;
     }
 
     private AIAssistant getAndValidateOwnership(String assistantId, String userId) {
