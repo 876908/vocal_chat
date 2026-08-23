@@ -7,7 +7,10 @@ import org.example.vocalchat.dto.request.CreateAssistantRequest;
 import org.example.vocalchat.dto.request.ModifyAssistantConfigRequest;
 import org.example.vocalchat.dto.request.StreamRequest;
 import org.example.vocalchat.dto.response.AIAssistantVO;
+import org.example.vocalchat.dto.response.AgentResultVO;
+import org.example.vocalchat.dto.response.ToolVO;
 import org.example.vocalchat.service.AIAssistantService;
+import org.example.vocalchat.service.agent.AgentService;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -19,9 +22,11 @@ import java.util.List;
 public class AIAssistantController {
 
     private final AIAssistantService assistantService;
+    private final AgentService agentService;
 
-    public AIAssistantController(AIAssistantService assistantService) {
+    public AIAssistantController(AIAssistantService assistantService, AgentService agentService) {
         this.assistantService = assistantService;
+        this.agentService = agentService;
     }
 
     @LogOperation("创建AI助手")
@@ -67,5 +72,23 @@ public class AIAssistantController {
     @PostMapping(value = "/streamGenerateReply", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter streamGenerateReply(@Valid @RequestBody StreamRequest request) {
         return assistantService.streamGenerateReply(request);
+    }
+
+    @LogOperation("Agent流式执行")
+    @PostMapping(value = "/agentStream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter agentStream(@Valid @RequestBody StreamRequest request) {
+        return agentService.agentStream(request);
+    }
+
+    @LogOperation("Agent同步执行")
+    @PostMapping("/agentRun")
+    public BaseResult<AgentResultVO> agentRun(@Valid @RequestBody StreamRequest request) {
+        return BaseResult.success(agentService.run(request));
+    }
+
+    @LogOperation("获取可用工具列表")
+    @GetMapping("/tools")
+    public BaseResult<List<ToolVO>> tools() {
+        return BaseResult.success(agentService.listTools());
     }
 }
