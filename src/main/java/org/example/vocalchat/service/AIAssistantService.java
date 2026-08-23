@@ -134,6 +134,9 @@ public class AIAssistantService {
     public void resetConversation(String assistantId) {
         String userId = UserContext.requireUserId();
         getAndValidateOwnership(assistantId, userId);
+        //这里的 findDialogue(assistantId) 确实是在调用对象方法，只是对象被省略了。
+        //它完整等价于Dialogue dialogue = this.findDialogue(assistantId);
+        //Java 在实例方法内部调用同类的其他实例方法时，会隐式补上this，所以不需要写
         Dialogue dialogue = findDialogue(assistantId);
         dialogue.setContexts(toJson(List.of()));
         dialogue.setUpdatedAt(LocalDateTime.now());
