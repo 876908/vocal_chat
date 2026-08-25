@@ -1,78 +1,100 @@
 package org.example.vocalchat.infrastructure.external.llm;
 
 import dev.langchain4j.data.message.ChatMessage;
-import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.data.message.UserMessage;
+import dev.langchain4j.model.chat.ChatModel;
 import dev.langchain4j.model.chat.StreamingChatModel;
+import dev.langchain4j.model.chat.request.ChatRequest;
 import dev.langchain4j.model.chat.response.ChatResponse;
 import dev.langchain4j.model.chat.response.StreamingChatResponseHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.example.vocalchat.common.enums.ErrorEnum;
+import org.example.vocalchat.common.exception.BaseException;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.Objects;
 
 @Service
+@ConditionalOnProperty(prefix = "vocal-chat.llm.qwen", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class QwenChatService {
 
-    private static final Logger log = LoggerFactory.getLogger(QwenChatService.class);
+    private final ChatModel chatModel;  // 普通对话
+    private final ChatModel searchChatModel;  //联网搜索
+    private final ChatModel deepThinkingChatModel;  //深度思考
+    private final StreamingChatModel streamingChatModel;  //普通流式
+    private final StreamingChatModel searchStreamingChatModel;
+    private final StreamingChatModel deepThinkingStreamingChatModel;
 
-    private final StreamingChatModel streamingChatModel;
-
-    public QwenChatService(StreamingChatModel streamingChatModel) {
+    public QwenChatService(@Qualifier("qwenChatModel") ChatModel chatModel,
+                           @Qualifier("qwenSearchChatModel") ChatModel searchChatModel,
+                           @Qualifier("qwenDeepThinkingChatModel") ChatModel deepThinkingChatModel,
+                           @Qualifier("qwenStreamingChatModel") StreamingChatModel streamingChatModel,
+                           @Qualifier("qwenSearchStreamingChatModel") StreamingChatModel searchStreamingChatModel,
+                           @Qualifier("qwenDeepThinkingStreamingChatModel") StreamingChatModel deepThinkingStreamingChatModel) {
+        this.chatModel = chatModel;
+        this.searchChatModel = searchChatModel;
+        this.deepThinkingChatModel = deepThinkingChatModel;
         this.streamingChatModel = streamingChatModel;
+        this.searchStreamingChatModel = searchStreamingChatModel;
+        this.deepThinkingStreamingChatModel = deepThinkingStreamingChatModel;
     }
-
-    public CompletableFuture<String> streamChat(String systemPrompt, List<ChatMessage> history,
-                                                 String userMessage,
-                                                 Consumer<String> onToken,
-                                                 Consumer<String> onThinking,
-                                                 Runnable onComplete,
-                                                 Consumer<Throwable> onError) {
-
-        var messages = new java.util.ArrayList<ChatMessage>();
-        if (systemPrompt != null && !systemPrompt.isBlank()) {
-            messages.add(SystemMessage.from(systemPrompt));
+    //同步聊天
+    public String chat(String userMessage) {
+        return chat(List.of(UserMessage.from(userMessage)), QwenChatMode.DEFAULT).aiMessage().text();
+    }
+    //支持多论对话
+    public ChatResponse chat(List<ChatMessage> messages, QwenChatMode mode) {
+        ChatRequest request = ChatRequest.builder()
+                .messages(messages)
+                .build();
+        return chat(request, mode);
+    }
+    // 完全自定义请求
+    public ChatResponse chat(ChatRequest request, QwenChatMode mode) {
+        Objects.requireNonNull(request, "request must not be null");
+        try {
+            return selectChatModel(mode).chat(request);
+        } catch (RuntimeException e) {
+            throw new BaseException(ErrorEnum.LLM_CALL_FAILED, e);
         }
-        messages.addAll(history);
-        messages.add(UserMessage.from(userMessage));
-
-        CompletableFuture<String> future = new CompletableFuture<>();
-        StringBuilder fullResponse = new StringBuilder();
-
-        streamingChatModel.chat(messages, new StreamingChatResponseHandler() {
-            @Override
-            public void onPartialResponse(String partialResponse) {
-                fullResponse.append(partialResponse);
-                onToken.accept(partialResponse);
-            }
-
-            @Override
-            public void onCompleteResponse(ChatResponse completeResponse) {
-                String text = fullResponse.toString();
-                onComplete.run();
-                future.complete(text);
-            }
-
-            @Override
-            public void onError(Throwable error) {
-                log.error("LLM stream error: {}", error.getMessage(), error);
-                onError.accept(error);
-                future.completeExceptionally(error);
-            }
-        });
-
-        return future;
     }
 
-    public CompletableFuture<String> streamChat(String systemPrompt,
-                                                 String userMessage,
-                                                 Consumer<String> onToken,
-                                                 Consumer<String> onThinking,
-                                                 Runnable onComplete,
-                                                 Consumer<Throwable> onError) {
-        return streamChat(systemPrompt, List.of(), userMessage, onToken, onThinking, onComplete, onError);
+    public void streamChat(List<ChatMessage> messages, QwenChatMode mode, StreamingChatResponseHandler handler) {
+        ChatRequest request = ChatRequest.builder()
+                .messages(messages)
+                .build();
+        streamChat(request, mode, handler);
+    }
+
+    public void streamChat(ChatRequest request, QwenChatMode mode, StreamingChatResponseHandler handler) {
+        Objects.requireNonNull(request, "request must not be null");
+        Objects.requireNonNull(handler, "handler must not be null");
+        try {
+            selectStreamingChatModel(mode).chat(request, handler);
+        } catch (RuntimeException e) {
+            throw new BaseException(ErrorEnum.LLM_CALL_FAILED, e);
+        }
+    }
+    // 模式选择
+    private ChatModel selectChatModel(QwenChatMode mode) {
+        return switch (normalize(mode)) {
+            case DEFAULT -> chatModel;
+            case ONLINE_SEARCH -> searchChatModel;
+            case DEEP_THINKING -> deepThinkingChatModel;
+        };
+    }
+
+    private StreamingChatModel selectStreamingChatModel(QwenChatMode mode) {
+        return switch (normalize(mode)) {
+            case DEFAULT -> streamingChatModel;
+            case ONLINE_SEARCH -> searchStreamingChatModel;
+            case DEEP_THINKING -> deepThinkingStreamingChatModel;
+        };
+    }
+
+    private QwenChatMode normalize(QwenChatMode mode) {
+        return mode == null ? QwenChatMode.DEFAULT : mode;
     }
 }

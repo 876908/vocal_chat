@@ -10,7 +10,7 @@ import org.example.vocalchat.dto.request.UpdateKnowledgeBaseRequest;
 import org.example.vocalchat.dto.response.KnowledgeBaseVO;
 import org.example.vocalchat.entity.KnowledgeBase;
 import org.example.vocalchat.entity.KnowledgeBaseFile;
-import org.example.vocalchat.infrastructure.service.MinIOStorageService;
+import org.example.vocalchat.infrastructure.external.storage.ObjectStorageService;
 import org.example.vocalchat.mapper.KnowledgeBaseFileMapper;
 import org.example.vocalchat.mapper.KnowledgeBaseMapper;
 import org.example.vocalchat.service.KnowledgeBaseService;
@@ -28,7 +28,7 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
 
     private final KnowledgeBaseMapper knowledgeBaseMapper;
     private final KnowledgeBaseFileMapper knowledgeBaseFileMapper;
-    private final MinIOStorageService minIOStorageService;
+    private final ObjectStorageService objectStorageService;
 
     @Override
     public void create(String userId, CreateKnowledgeBaseRequest request) {
@@ -81,7 +81,7 @@ public class KnowledgeBaseServiceImpl implements KnowledgeBaseService {
                 new LambdaQueryWrapper<KnowledgeBaseFile>()
                         .eq(KnowledgeBaseFile::getKnowledgeBaseId, kbId));
         for (KnowledgeBaseFile file : files) {
-            minIOStorageService.delete(file.getStorageKey());
+            objectStorageService.deleteObject(file.getStorageKey());
             knowledgeBaseFileMapper.deleteById(file.getId());
         }
         log.info("知识库删除: 已删除 {} 个关联文件, kbId={}", files.size(), kbId);

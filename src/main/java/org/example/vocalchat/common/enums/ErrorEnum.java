@@ -44,6 +44,7 @@ public enum ErrorEnum {
     SSE_TIMEOUT(4010, "SSE 连接超时"),
     FILE_NOT_FOUND(4011, "文件不存在"),
     FILE_DELETE_FAILED(4012, "文件删除失败"),
+    OBJECT_STORAGE_ERROR(4013, "对象存储操作失败"),
     ;
 
     private final Integer code;
