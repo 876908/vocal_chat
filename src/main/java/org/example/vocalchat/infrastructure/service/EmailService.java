@@ -20,6 +20,7 @@ public class EmailService {
 
     private static final String CODE_PREFIX = "email:code:";
     private static final String RATE_PREFIX = "email:rate:";
+    private static final String SEND_RATE_PREFIX = "email:send:rate:";
     private static final long CODE_TTL_MINUTES = 5;
     private static final long RATE_LIMIT_SECONDS = 60;
 
@@ -58,6 +59,39 @@ public class EmailService {
         } catch (ResendException e) {
             log.error("发送验证码邮件失败: {}", toEmail, e);
             redisTemplate.delete(CODE_PREFIX + toEmail);
+            throw new BaseException(ErrorEnum.EMAIL_SEND_FAILED);
+        }
+    }
+
+    public void sendEmail(String to, String subject, String content) {
+        if (to == null || to.isBlank()) {
+            throw new BaseException(ErrorEnum.PARAM_MISSING.getCode(), "收件人邮箱不能为空");
+        }
+        if (subject == null || subject.isBlank()) {
+            throw new BaseException(ErrorEnum.PARAM_MISSING.getCode(), "邮件主题不能为空");
+        }
+        if (content == null || content.isBlank()) {
+            throw new BaseException(ErrorEnum.PARAM_MISSING.getCode(), "邮件正文不能为空");
+        }
+
+        String rateKey = SEND_RATE_PREFIX + to;
+        Boolean canSend = redisTemplate.opsForValue()
+                .setIfAbsent(rateKey, "1", Duration.ofSeconds(RATE_LIMIT_SECONDS));
+        if (canSend == null || !canSend) {
+            throw new BaseException(ErrorEnum.EMAIL_RATE_LIMIT);
+        }
+
+        try {
+            CreateEmailOptions options = CreateEmailOptions.builder()
+                    .from(fromEmail)
+                    .to(to)
+                    .subject(subject)
+                    .text(content)
+                    .build();
+            CreateEmailResponse response = resend.emails().send(options);
+            log.info("邮件已发送至 {}, id={}", to, response.getId());
+        } catch (ResendException e) {
+            log.error("发送邮件失败: {}", to, e);
             throw new BaseException(ErrorEnum.EMAIL_SEND_FAILED);
         }
     }
